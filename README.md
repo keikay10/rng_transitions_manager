@@ -16,3 +16,7 @@ Percentage meter, displays visual representation of probability
 
 Transitions can be saved and loaded as concatenated transitions\
 Copy all copies concatenated transitions and outcomes
+
+Build:\
+Use bun to bundle index.ts, or use your preferred bundler\
+Run index.html in ./http
