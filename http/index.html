@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RNG Transitions Manager</title>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="CContainerA">
+		<div class="CContainerB">
+			<div class="CIndent">RNG Transitions Manager</div>
+		</div>
+		<div class="CContainerB">
+			<div>
+				<label for="ITransitionsConcatenated">Concatenated:</label>
+			</div>
+			<div>
+				<textarea id="ITransitionsConcatenated" rows="4"></textarea>
+			</div>
+			<div>
+				<button id="ITransitionsImport">Import</button><!--
+				--><button id="ITransitionsConcatenatedCopy">Copy</button><!--
+				--><button id="ITransitionsConcatenatedPaste">Paste</button>
+			</div>
+		</div>
+		<div class="CContainerB">
+			<div>
+				<label for="ITransitionsGenerate">Outcomes:</label>
+			</div>
+			<div>
+				<textarea id="ITransitionsOutcomes" rows="2" readonly></textarea>
+			</div>
+			<div>
+				<button id="ITransitionsGenerate">Generate</button><!--
+				--><button id="ITransitionsOutcomesCopy">Copy</button><!--
+				--><button id="ITransitionsCopyAll">Copy all</button><!--
+				--><button id="ITransitionsGenerateClear">Clear</button>
+			</div>
+		</div>
+		<div class="CContainerB">
+			<div>
+				<label for="ITransitions">Transitions:</label>
+			</div>
+			<div>
+				<div class="CIndent">
+					<label for="ITransitionsSelect">Select:</label><!--
+					--><span id="ITransitionsSelectB" class="CCheckbox"><input id="ITransitionsSelect" type="checkbox" ></input></span><!--
+					--><button id="ITransitionsDeleteSelected">Delete selected</button><!--
+					--><label id="ITransitionsDeleteAllLabel" for="ITransitionsDeleteAll">Delete all:</label><!--
+					--><span id="ITransitionsDeleteAllConfirmB" class="CCheckbox"><input id="ITransitionsDeleteAllConfirm" type="checkbox" ></input></span><!--
+					--><button id="ITransitionsDeleteAll">Delete all</button>
+				</div>
+			</div>
+			<div>
+				<ol id="ITransitions">
+				</ol>
+			</div>
+		</div>
+		<div class="CContainerC">
+		</div>
+	</div>
+    <script src="script.js"></script>
+</body>
+</html>
