@@ -132,6 +132,12 @@ ol {
 #ITransitionsDeleteAllLabel {
 	margin-left: 4ch;
 }
+#ITransitionsGenerateDuplicatesLabel {
+	margin-left: 4ch;
+}
+#ITransitionsGenerateDuplicatesB {
+	margin-left: 1ch;
+}
 
 .CCheckbox {
 	display: inline-block;

@@ -14,6 +14,7 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			IvElementTransitionsDeleteAll: HTMLButtonElement = null!;
 			IvElementTransitionsDeleteAllConfirm: HTMLInputElement = null!;
 			IvElementTransitionsConcatenated: HTMLInputElement = null!;
+			IvElementTransitionsGenerateDuplicates: HTMLInputElement = null!;
 			IvElementTransitionsConcatenatedCopy: HTMLButtonElement = null!;
 			IvElementTransitionsConcatenatedPaste: HTMLButtonElement = null!;
 			IvElementTransitionsOutcomesCopy: HTMLButtonElement = null!;
@@ -26,6 +27,7 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			IvTransitionsImportRegex: RegExp = /(?: *([^,]*?) *) +(?:\d+ *- *\d+ +)?(?:\( *(\d+) *\)|\d+)(?:[^,]*,|[^,]*$)/g;
 
 			IvDragObject: any = null!;
+			IvTransitionOutcomes: Set< number > = new Set( );
 
 			IvProgramDependencyInjected: boolean = false;
 	// #endregion
@@ -86,6 +88,8 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		this.IvElementTransitionsGenerateClear.addEventListener( "click", this.ImOnClick_TransitionsGenerateClear.bind( this ) );
 
 		this.IvElementTransitionsOutcomes = document.getElementById( "ITransitionsOutcomes" )! as HTMLTextAreaElement;
+
+		this.IvElementTransitionsGenerateDuplicates = document.getElementById( "ITransitionsGenerateDuplicates" )! as HTMLInputElement;
 
 		this.ImSetStateTransitionsDeleteSelected( false );
 		this.ImSetStateTransitionsDeleteAll( this.IvElementTransitionsDeleteAllConfirm.checked );
@@ -261,6 +265,13 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		this.ImSetStateTransitionsOutcomesCopy( false );
 		this.ImSetStateTransitionsCopyAll( false );
 	}
+	ImClearOutcomes( ): void {
+		this.IvElementTransitionsOutcomes.value = "";
+		this.ImSetStateTransitionsOutcomesCopy( false );
+		this.ImSetStateTransitionsCopyAll( false );
+		if ( this.IvTransitionOutcomes.size )
+			this.IvTransitionOutcomes.clear( );
+	}
 
 	ImOnDoubleClick_TransitionDraggable( aE: MouseEvent ): void {
 		this.ImTransitionsDisplayHide( );
@@ -417,21 +428,23 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			vElementInputText: HTMLInputElement,
 			vElement: any,
 			vRangeTotal: number = 0,
-			vRangeValue: number = 0,
-			vRangeTotalB: number = 1,
-			vRangeTotalBNext: number = 0,
-			vErrorRange = false,
-			vErrorText = false,
-			vOutcome = 0.
+			vRangeTotalB: number,
+			vRangeTotalBNext: number,
+			vErrorRange: boolean = false,
+			vErrorText: boolean = false,
+			vOutcome: number = 0,
+			vCount: number = 0,
+			vDuplicates: boolean = this.IvElementTransitionsGenerateDuplicates.checked;
 
 		for ( vElement of this.IpTransitions ) {
 			vElementInputRange = vElement.children[ 2 ] as HTMLInputElement;
 			vElementInputText = (vElement as HTMLLIElement).children[ 3 ] as HTMLInputElement;
 
 			if ( ! vErrorRange ) {
-				if ( vElementInputRange.validity.valid )
+				if ( vElementInputRange.validity.valid ) {
 					vRangeTotal += vElementInputRange.valueAsNumber;
-				else
+					vCount++;
+				} else
 					vErrorRange = true;
 
 				if ( ! vErrorText ) {
@@ -443,38 +456,47 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 
 		if ( vErrorRange
 				|| vErrorText ) {
-			this.IvElementTransitionsOutcomes.value = "";
+			this.ImClearOutcomes( );
 			return;
 		}
 
-		vOutcome = _gvExtensions.GcsExtensions.CmGetRandomIntInclusive( 1, vRangeTotal )
+		if ( vCount )
+			while ( true ) {
+				vOutcome = _gvExtensions.GcsExtensions.CmGetRandomIntInclusive( 1, vRangeTotal );
 
-		for ( vElement of this.IpTransitions ) {
-			vElementInputRange = vElement.children[ 2 ] as HTMLInputElement;
-			vRangeTotalBNext += vElementInputRange.valueAsNumber;
+				vRangeTotalB = 1;
+				vRangeTotalBNext = 0;
 
-			if ( ( vRangeTotalB <= vOutcome )
-					&& ( vOutcome <= vRangeTotalBNext ) ) {
-				if ( this.IvElementTransitionsOutcomes.value?.length )
-					this.IvElementTransitionsOutcomes.value += ", " + vOutcome.toString( ) + " " + (vElement.children[ 3 ] as HTMLInputElement).value;
-				else {
-					this.IvElementTransitionsOutcomes.value = vOutcome.toString( ) + " " + (vElement.children[ 3 ] as HTMLInputElement).value;
+				for ( vElement of this.IpTransitions ) {
+					vElementInputRange = vElement.children[ 2 ] as HTMLInputElement;
+					vRangeTotalBNext += vElementInputRange.valueAsNumber;
+
+					if ( ( vRangeTotalB <= vOutcome )
+							&& ( vOutcome <= vRangeTotalBNext ) ) {
+						if ( !vDuplicates ) {
+							if ( this.IvTransitionOutcomes.has( vRangeTotalB ) )
+								break;
+							else
+								this.IvTransitionOutcomes.add( vRangeTotalB );
+						}
+						if ( this.IvElementTransitionsOutcomes.value?.length )
+							this.IvElementTransitionsOutcomes.value += ", " + vOutcome.toString( ) + " " + (vElement.children[ 3 ] as HTMLInputElement).value;
+						else
+							this.IvElementTransitionsOutcomes.value = vOutcome.toString( ) + " " + (vElement.children[ 3 ] as HTMLInputElement).value;
+						this.ImSetStateTransitionsOutcomesCopy( true );
+						this.ImSetStateTransitionsCopyAll( this.IvElementTransitionsConcatenated.value.length !== 0 );
+						return;
+					}
+					vRangeTotalB = vRangeTotalBNext + 1;
 				}
-				this.ImSetStateTransitionsOutcomesCopy( true );
-				this.ImSetStateTransitionsCopyAll( this.IvElementTransitionsConcatenated.value.length !== 0 );
-				return;
+				if ( this.IvTransitionOutcomes.size >= vCount )
+					return;
 			}
-			vRangeTotalB = vRangeTotalBNext + 1;
-		}
 
-		this.IvElementTransitionsOutcomes.value = "";
-		this.ImSetStateTransitionsOutcomesCopy( false );
-		this.ImSetStateTransitionsCopyAll( false );
+		this.ImClearOutcomes( );
 	}
 	ImOnClick_TransitionsGenerateClear( aE: Event ): void {
-		this.IvElementTransitionsOutcomes.value = "";
-		this.ImSetStateTransitionsOutcomesCopy( false );
-		this.ImSetStateTransitionsCopyAll( false );
+		this.ImClearOutcomes( );
 	}
 	ImOnClick_TransitionsConcatenatedCopy( aE: Event ): void {
 		navigator.clipboard.writeText( this.IvElementTransitionsConcatenated.value );
