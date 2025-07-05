@@ -318,8 +318,9 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		if ( ! this.IpTransitions.length )
 			this.ImInsertTransition( null, true );
 
-		this.ImTransitionsDisplayHide( );
 		this.ImUpdate( );
+		this.ImSetStateTransitionsDeleteSelected( false );
+
 		this.ImTransitionsDisplayShow( );
 	}
 	ImOnClick_TransitionsDeleteAll( aE: MouseEvent ): void {
@@ -333,6 +334,7 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			this.ImInsertTransition( null, true );
 
 		this.ImUpdate( );
+		this.ImSetStateTransitionsDeleteSelected( false );
 		this.ImTransitionsDisplayShow( );
 	}
 	ImOnDragStart_TransitionDraggable( aE: DragEvent ): void {
