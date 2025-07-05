@@ -259,7 +259,7 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		else
 			this.IvElementTransitionsConcatenated.value = vTexts.join( ", " );
 
-		this.IvElementTransitionsOutcomes.value = "";
+		this.ImClearOutcomes( );
 
 		this.ImSetStateTransitionsConcatenatedCopy( this.IvElementTransitionsConcatenated.value.length !== 0 );
 		this.ImSetStateTransitionsOutcomesCopy( false );
