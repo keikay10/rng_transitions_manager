@@ -163,6 +163,7 @@ ol {
 
 .CTransitionRange {
 	appearance: textfield;
+	-webkit-appearance: textfield;
 	width: 5ch;
 	margin-left: 2ch;
 }
