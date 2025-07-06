@@ -23,8 +23,7 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			IvElementTransitionsGenerate: HTMLButtonElement = null!;
 			IvElementTransitionsGenerateClear: HTMLButtonElement = null!;
 			IvElementTransitionsOutcomes: HTMLTextAreaElement = null!;
-
-			IvTransitionsImportRegex: RegExp = /(?: *([^,]*?) *) +(?:\d+ *- *\d+ +)?(?:\( *(\d+) *\)|\d+)(?:[^,]*,|[^,]*$)/g;
+			IvTransitionsImportRegex: RegExp = /(?: *([^,\r\n][^,\r\n]*?)) *(?:\d\d*? *- *\d+)?(?: *\( *(\d\d*?) *\)|\d+)[^,]*(?=,|$)| *([^,\r\n][^,]*?) ?(?=,|$)/g;
 
 			IvDragObject: any = null!;
 			IvTransitionOutcomes: Set< number > = new Set( );
@@ -133,7 +132,12 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		vRange.classList.add( "CTransitionRange" );
 		vRange.addEventListener( "input", this.ImOnInput_TransitionRange.bind( this ) );
 		vRange.addEventListener( "keyup", this.ImOnKeyUp_TransitionRange.bind( this ) );
-		if ( aRange )
+		if ( aText ) {
+			if ( aRange )
+				vRange.valueAsNumber = aRange;
+			else
+				vRange.valueAsNumber = 1;
+		} else if ( aRange )
 			vRange.valueAsNumber = aRange;
 		vLi.appendChild( vRange );
 
@@ -239,6 +243,9 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 			if ( vValueLength < vElementInputText.value.length )
 				vValueLength = vElementInputText.value.length;
 		}
+
+		if ( vRangeTotalNext <= 0 )
+			vErrorRange = true;
 
 		for ( vElement of this.IpTransitions ) {
 			if ( vErrorRange )
@@ -363,10 +370,11 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 	}
 	ImOnInput_TransitionRange( aE: Event ): void {
 		let vElementInput = aE.target as HTMLInputElement;
-		
+
 		if ( vElementInput.validity.valid
-				&& ( vElementInput.value.length > GcRngTransitionManager.CvRangeLengthMax ) )
-			vElementInput.value = vElementInput.value.substring( 0, GcRngTransitionManager.CvRangeLengthMax )
+				&& ( vElementInput.value.length < 0 ) )
+			vElementInput.value = vElementInput.value.substring( 0, GcRngTransitionManager.CvRangeLengthMax );
+
 		this.ImTransitionsDisplayHide( );
 		this.ImUpdate( );
 		this.ImTransitionsDisplayShow( );
@@ -406,12 +414,20 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 		let vText = this.IvElementTransitionsConcatenated.value,
 			vMatch: RegExpExecArray | null = this.IvTransitionsImportRegex.exec( vText );
 
+		let vTries = 0;
 		while ( vMatch !== null ) {
 			if ( vMatch[ 2 ] )
 				this.ImInsertTransition( null, false, parseInt( vMatch[ 2 ] ), vMatch[ 1 ] );
+			else if ( vMatch[ 3 ] )
+				this.ImInsertTransition( null, false, 1, vMatch[ 3 ] );
 			else
 				this.ImInsertTransition( null, false, 1, vMatch[ 1 ] );
 			vMatch = this.IvTransitionsImportRegex.exec( vText );
+
+			console.log( this.IvTransitionsImportRegex.lastIndex );
+			vTries++;
+			if (vTries > 100)
+				break;
 		}
 
 		if ( ! this.IpTransitions.length )
@@ -506,7 +522,10 @@ export class GcRngTransitionManager implements _gvInterfaces.GiProgram {
 	ImOnClick_TransitionsConcatenatedPaste( aE: Event ): void {
 		navigator.clipboard.readText( ).then( ( aValue: string ) => {
 			this.IvElementTransitionsConcatenated.value = aValue;
-			this.ImSetStateTransitionsConcatenatedCopy( this.IvElementTransitionsConcatenated.value.length !== 0 );
+
+			let vLength = this.IvElementTransitionsConcatenated.value.length;
+			this.ImSetStateTransitionsImport( vLength !== 0 );
+			this.ImSetStateTransitionsConcatenatedCopy( vLength !== 0 );
 		} );
 	}
 	ImOnClick_TransitionsOutcomesCopy( aE: Event ): void {
